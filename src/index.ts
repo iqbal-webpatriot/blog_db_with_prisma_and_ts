@@ -10,6 +10,7 @@ export const prisma = new PrismaClient(); // Initializing Prisma client
 // Import controller
 import userController from './controller/User/user.controller';
 import postController from './controller/Post/post.controller'
+import {login,register} from './controller/Auth/auth.controller'
 
 // Initializing express app
 const app = express();
@@ -22,6 +23,8 @@ app.use(express.json());
 // Routes
 app.use('/api', userController);
 app.use('/api', postController);
+app.post('/api/login',login);
+app.post('/api/register',register);
 
 // Connect to the database and start the server
 // prisma.$connect()

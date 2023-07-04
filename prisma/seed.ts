@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { hashPassword } from '../src/utils/password.util';
 
 const prisma = new PrismaClient();
 
@@ -6,17 +7,12 @@ async function seed() {
   // Create and insert users
   const user1 = await prisma.user.create({
     data: {
-      email: 'user1@example.com',
-      name: 'User 1',
+      email: 'testuser@gmail.com',
+      name: 'test user one',
+      password: hashPassword('Test@123')
     },
   });
 
-  const user2 = await prisma.user.create({
-    data: {
-      email: 'user2@example.com',
-      name: 'User 2',
-    },
-  });
 
   // Create and insert posts
   const post1 = await prisma.post.create({
@@ -25,15 +21,6 @@ async function seed() {
       title: 'Post 1',
       body: 'This is the body of Post 1',
       authorId: user1.id,
-    },
-  });
-
-  const post2 = await prisma.post.create({
-    data: {
-      slug: 'post-2',
-      title: 'Post 2',
-      body: 'This is the body of Post 2',
-      authorId: user2.id,
     },
   });
 
