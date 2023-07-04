@@ -27,7 +27,7 @@ const register= async (req:Request,res:Response)=>{
                 password:hashPassword(req.body.password),
             }
         });
-     return res.status(201).send({message:'Account created successfully', data:newUser})
+     return res.status(201).send({message:'Account created successfully'})
  } catch (error) {
     return res.status(500).send(error);
  }
