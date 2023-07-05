@@ -4,10 +4,25 @@ import jwt from 'jsonwebtoken';
 import { Response,Request } from 'express';
 import { prisma } from '../..';
 import { comparePassword, hashPassword } from '../../utils/password.util';
+import { body } from 'express-validator';
 // function to create new token for the new user
 const newToken=(user:any,expireTime:string)=>{
     return jwt.sign({user},`${process.env.JWT_SECRET_KEY}`,{expiresIn:expireTime})
 }
+//!register validation 
+ export const registerValidation=[
+    body('email').exists().withMessage('Email field  is required').bail().notEmpty().withMessage("Email can not be empty string").bail().isEmail().withMessage("Invalid email address"),
+    body('password').exists().withMessage('Password field is required').bail(). isString().withMessage('Password must be a string').bail().isLength({min:6}).withMessage('Password must be at least 6 characters'),
+    body('name').exists().withMessage('Name is required').bail().isString().withMessage('Name must be a string'),
+]
+//!login validation 
+export const loginValidation=[
+    body('email').exists().withMessage('Email field  is required').bail().notEmpty().withMessage("Email can not be empty string").bail().isEmail().withMessage("Invalid email address"),
+    body('password').exists().withMessage('Password field is required').bail().
+    isString().withMessage('Password must be a string').bail()
+    .isLength({min:6}).withMessage('Password must be at least 6 characters'),
+  
+]
 // register method 
 const register= async (req:Request,res:Response)=>{
  try {

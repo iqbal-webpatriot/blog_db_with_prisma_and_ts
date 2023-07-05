@@ -1,7 +1,26 @@
 import Router from 'express'
 import { prisma } from '../..';
+import { body } from 'express-validator';
+import handleValidation from '../../middleware/Validation/validationHandler';
 const router = Router()
-
+//!comment validations query 
+const commentValidation = [
+    body('comment')
+      .exists().withMessage('Comment field is required')
+      .bail()
+      .notEmpty().withMessage('Comment can not be empty string'),
+    body('postId')
+      .exists().withMessage('PostId field is required')
+      .bail()
+      .notEmpty().withMessage('PostId can not be empty string'),
+    body('authorId')
+      .exists().withMessage('AuthorId field is required')
+      .bail()
+      .notEmpty().withMessage('AuthorId can not be empty string'),
+  ];
+  
+  
+  
 //get all comments route 
 router.get('/comments',async(req,res)=>{
     try {
@@ -31,7 +50,8 @@ router.get('/comments',async(req,res)=>{
     }
 });
 //create new comment route 
-router.post('/comment',async(req,res)=>{
+router.post('/comment',handleValidation(commentValidation),async(req,res)=>{
+    
     try {
         const newComment = await prisma.comment.create({
             data:{
