@@ -6,7 +6,7 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
-
+//!Post model
 model Post {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   slug     String    @unique
@@ -18,11 +18,13 @@ model Post {
   updatedAt DateTime @updatedAt
   author   User      @relation(fields: [authorId], references: [id])
   authorId String    @db.ObjectId
+  cateogry Category? @relation(fields: [categoryId], references: [id])
+  categoryId String? @db.ObjectId
   comments Comment[]
   likes    Like[]
   views    View[]
 }
-
+//!User model
 model User {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   email   String   @unique
@@ -36,7 +38,7 @@ model User {
   comments Comment[]
   likes    Like[]
 }
-
+//!Comment model
 model Comment {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   comment String
@@ -47,7 +49,7 @@ model Comment {
   author  User   @relation(fields: [authorId], references: [id])
   authorId String @db.ObjectId
 }
-
+//!Like model
 model Like {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   post    Post   @relation(fields: [postId], references: [id])
@@ -58,11 +60,27 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+//!View model
 model View{
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   post    Post   @relation(fields: [postId], references: [id])
   postId  String @db.ObjectId
-  ipAddress String
+  ipAddress String  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//!Category model 
+model Category{
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String @unique
+  posts   Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+//!Tag model 
+model Tag{
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
