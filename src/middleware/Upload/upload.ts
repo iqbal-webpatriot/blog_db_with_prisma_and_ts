@@ -8,7 +8,8 @@ import { Request, Response, NextFunction } from 'express'
 // *? creating disk storage 
 const storage= multer.diskStorage({
      destination: function(req:Request,file:multerFileType,cb){
-       cb(null,path.join(__dirname,'../uploads'))
+        console.log(path.join(process.cwd(),'uploads'))
+       cb(null,path.join(process.cwd(),'uploads'))
      },
      filename:function(req:Request,file:multerFileType,cb){
         // ** unique string sequence to save file in uploads dir
@@ -41,7 +42,7 @@ const upload= multer({
 
 // single file upload method 
 
- const uploadSingle=function(fileKey:string){
+ export const uploadSingle=function(fileKey:string){
     // returning a middleware function 
     return function(req:Request,res:Response,next:NextFunction){
         const uploadItem= upload.single(fileKey);
@@ -64,7 +65,7 @@ const upload= multer({
     }
  }
 //? upload mulitple file method
-const uploadMultiple=function(fileKey:string){
+export const uploadMultiple=function(fileKey:string){
     // returning a middleware function 
     return function(req:Request,res:Response,next:NextFunction){
        
@@ -88,4 +89,3 @@ const uploadMultiple=function(fileKey:string){
         })
     }
  }
- module.exports={uploadSingle,uploadMultiple}

@@ -13,7 +13,7 @@ const verifyToken = (token:string) => {
   });
 };
 //!defining type for authenitcate function
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
     user: any; // Define the type of the 'user' property here
   }
  const authenticate = ()=>{

@@ -25,7 +25,8 @@ const PORT = process.env.PORT || 5000;
 // Global middleware
 app.use(cors());
 app.use(express.json());
-
+//making uploads folder public 
+app.use('/uploads',express.static('uploads'))
 // Routes
 app.use('/api', userController);
 app.use('/api', postController);
