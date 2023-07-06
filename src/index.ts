@@ -16,6 +16,7 @@ import handleValidation from './middleware/Validation/validationHandler';
 import likeController from './controller/Like/like.controller'
 import viewCountController from './controller/ViewCount/viewCount.controller';
 import categoryController from './controller/Category/category.controller';
+import tagController from './controller/Tag/tag.controller';
 
 // Initializing express app
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api', commentController);
 app.use('/api',likeController)
 app.use('/api',viewCountController)
 app.use('/api',categoryController)
+app.use('/api',tagController)
 
 // Connect to the database and start the server
 // prisma.$connect()
