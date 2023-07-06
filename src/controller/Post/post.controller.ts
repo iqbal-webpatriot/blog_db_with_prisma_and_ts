@@ -25,6 +25,8 @@ router.get('/posts',async(req,res)=>{
                     }
                 },
                 comments:true,
+                tags:true
+                
             }
         });
         return res.status(200).send(allPosts)
@@ -41,7 +43,7 @@ router.post('/post',handleValidation(postValidation),async(req,res)=>{
           title:req.body.title,
           body:req.body.body,
          authorId:req.body.authorId,
-
+         tagId:req.body.tags
 
         } 
         })

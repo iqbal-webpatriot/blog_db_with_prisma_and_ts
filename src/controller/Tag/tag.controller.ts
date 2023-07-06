@@ -10,7 +10,12 @@ const tagValidation=[
 //!get all tags route
 router.get('/tags',async(req,res)=>{
     try {
-        const allTags= await prisma.tag.findMany();
+        const allTags= await prisma.tag.findMany({
+            include:{
+                posts: false,
+            
+            }
+        });
         return res.status(200).send(allTags);
         
     } catch (error) {

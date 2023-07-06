@@ -20,6 +20,8 @@ model Post {
   authorId String    @db.ObjectId
   cateogry Category? @relation(fields: [categoryId], references: [id])
   categoryId String? @db.ObjectId
+   tags  Tag[] @relation(fields: [tagId], references: [id])
+   tagId String[] @db.ObjectId
   comments Comment[]
   likes    Like[]
   views    View[]
@@ -88,6 +90,8 @@ model Tag{
   tag_name    String 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  posts  Post[]  @relation(fields: [postId], references: [id])
+  postId  String[] @db.ObjectId
   @@index([tag_name])
 }
 // Address is an embedded document
