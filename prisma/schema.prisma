@@ -72,7 +72,7 @@ model View{
 //!Category model 
 model Category{
   id      String @id @default(auto()) @map("_id") @db.ObjectId
-  name    String @unique
+  category_name    String @unique
   posts   Post[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,7 +80,7 @@ model Category{
 //!Tag model 
 model Tag{
   id      String @id @default(auto()) @map("_id") @db.ObjectId
-  name    String @unique
+  tag_name    String @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
