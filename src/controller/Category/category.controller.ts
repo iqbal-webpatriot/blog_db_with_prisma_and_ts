@@ -20,11 +20,21 @@ router.get('/categories', async(req, res) => {
 //!create new category 
 router.post('/category',handleValidation(createCategoryValidation), async(req, res) => {
     try {
-        const newCategory = await prisma.category.create({
-            data:{
-                 category_name: req.body.name
+        //!check if category already exist
+        const categoryExist = await prisma.category.findFirst({
+            where:{
+                category_name:req.body.category_name
             }
         });
+        //!if category exist return error
+        if(categoryExist) return res.status(400).send({message:'Category already exist'});
+        //!if category not exist create new category
+        const newCategory = await prisma.category.create({
+            data:{
+                 category_name: req.body.category_name
+            }
+        });
+        //!return new category
         return res.status(201).send(newCategory);
         
     } catch (error) {
