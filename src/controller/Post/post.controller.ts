@@ -24,8 +24,20 @@ router.get('/posts',async(req,res)=>{
                         name:true,
                     }
                 },
-                comments:true,
-                tags:true
+                comments:{
+                    select:{
+                        id: true,
+                        comment:true,
+                        authorId:true,
+                        postId:true
+                    }
+                },
+                tags:{
+                    select:{
+                        id:true,
+                        tag_name:true
+                    }
+                }
                 
             }
         });
