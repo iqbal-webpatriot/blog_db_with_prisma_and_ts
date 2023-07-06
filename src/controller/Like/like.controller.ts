@@ -1,7 +1,8 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { prisma } from "../..";
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
+import  authenticate  from "../../middleware/Authentication/authenticate";
 const router = Router();
 //!liked post validation
 const likePostValidation = [
@@ -30,8 +31,9 @@ router.get("/likes", async (req, res) => {
 //create new liked post entry
 router.post(
   "/like",
+ authenticate() as any,
   handleValidation(likePostValidation),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response,next:NextFunction) => {
     try {
       //!check if a post has already liked by the user
       const { authorId, postId } = req.body;
