@@ -10,7 +10,13 @@ const postValidation = [
     body('title').exists().withMessage('Title field is required').bail().notEmpty().withMessage('Title can not be empty string'),
     body('body').exists().withMessage('Body field is required').bail().notEmpty().withMessage('Body can not be empty string'),
     body('authorId').exists().withMessage('AuthorId field is required').bail().notEmpty().withMessage('AuthorId can not be empty string'),
-
+    body('categoryId').exists().withMessage('CategoryId field is required').bail().notEmpty().withMessage('CategoryId can not be empty string'),
+    body('postImage').custom((value, { req }) => {
+        if (!req?.file?.mimetype.startsWith("image")) {
+            throw new Error("Please upload an image file");
+        }
+        return true;
+    })
 
 
 ]
@@ -48,7 +54,7 @@ router.get('/posts',async(req,res)=>{
     }
 })
 //route to create new entry in user model 
-router.post('/post',uploadSingle('postImage'),async(req,res)=>{
+router.post('/post',uploadSingle('postImage'),handleValidation(postValidation),async(req,res)=>{
     try {
         const newUser= await prisma.post.create({
         data:{
