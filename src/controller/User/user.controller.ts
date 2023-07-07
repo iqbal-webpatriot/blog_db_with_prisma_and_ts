@@ -26,6 +26,7 @@ router.get('/users',async(req,res)=>{
               id: true,
               name: true,
               email: true,
+              avatar: true,
               posts: {
                 select: {
                   id: true,
