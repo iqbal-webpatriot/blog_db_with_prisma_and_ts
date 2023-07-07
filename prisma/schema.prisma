@@ -18,8 +18,9 @@ model Post {
   updatedAt DateTime @updatedAt
   author   User      @relation(fields: [authorId], references: [id])
   authorId String    @db.ObjectId
-  cateogry Category? @relation(fields: [categoryId], references: [id])
-  categoryId String? @db.ObjectId
+  cateogry Category @relation(fields: [categoryId], references: [id])
+  categoryId String @db.ObjectId
+  postImage String
    tags  Tag[] @relation(fields: [tagId], references: [id])
    tagId String[] @db.ObjectId
   comments Comment[]

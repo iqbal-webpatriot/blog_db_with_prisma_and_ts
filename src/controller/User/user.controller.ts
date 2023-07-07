@@ -3,7 +3,21 @@ import { prisma } from "../..";
 import fs from 'fs';
 import path from 'path';
 import { uploadSingle } from '../../middleware/Upload/upload'
+import { body } from "express-validator";
+import handleValidation from "../../middleware/Validation/validationHandler";
 const router = Router();
+//!user profile update validation 
+const userProfileValidation =[
+  body("avatar").custom((value,{req})=>{
+    // if (!req.file) {
+    //   throw new Error('File is required');
+    // }
+    if (!req?.file?.mimetype.startsWith("image")) {
+      throw new Error("Please upload an image file");
+    }
+    return true;
+  })
+]
 
 router.get('/users',async(req,res)=>{
     try {
@@ -29,7 +43,7 @@ router.get('/users',async(req,res)=>{
 })
 
 //!router update user profile 
-router.patch('/user/profile/:userId',uploadSingle('avatar'),async(req,res)=>{
+router.patch('/user/profile/:userId',uploadSingle('avatar'),handleValidation(userProfileValidation),async(req,res)=>{
   try {
      //get current user 
       const currentUser = await prisma.user.findUnique({

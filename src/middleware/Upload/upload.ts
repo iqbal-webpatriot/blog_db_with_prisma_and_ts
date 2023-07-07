@@ -8,7 +8,6 @@ import { Request, Response, NextFunction } from 'express'
 // *? creating disk storage 
 const storage= multer.diskStorage({
      destination: function(req:Request,file:multerFileType,cb){
-        console.log(path.join(process.cwd(),'uploads'))
        cb(null,path.join(process.cwd(),'uploads'))
      },
      filename:function(req:Request,file:multerFileType,cb){

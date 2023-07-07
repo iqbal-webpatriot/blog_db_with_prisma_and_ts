@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../..";
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
+import { uploadSingle } from "../../middleware/Upload/upload";
 const router = Router();
 //!create post validation
 const postValidation = [
@@ -47,7 +48,7 @@ router.get('/posts',async(req,res)=>{
     }
 })
 //route to create new entry in user model 
-router.post('/post',handleValidation(postValidation),async(req,res)=>{
+router.post('/post',uploadSingle('postImage'),async(req,res)=>{
     try {
         const newUser= await prisma.post.create({
         data:{
@@ -55,7 +56,11 @@ router.post('/post',handleValidation(postValidation),async(req,res)=>{
           title:req.body.title,
           body:req.body.body,
          authorId:req.body.authorId,
-         tagId:req.body.tags
+         tagId:req.body.tags,
+         postImage:req?.file?.filename as string,
+         categoryId:req.body.categoryId
+        
+         
 
         } 
         })
