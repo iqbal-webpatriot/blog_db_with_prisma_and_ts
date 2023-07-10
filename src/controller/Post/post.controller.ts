@@ -111,6 +111,139 @@ router.get("/posts", async (req, res) => {
     const page = +(req.query.page as string) || 1;
     const limit = +(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
+    //!if category and search has value 
+    if(req.query.search && req.query.category){
+      const allPostWithCategoryAndSearch = await prisma.post.findMany({
+        where:{
+            title:{
+            contains:req.query.search as string,
+              mode:'insensitive'
+            },
+            cateogry:{
+              category_name:{
+                equals:req.query.category as string,
+                mode:'insensitive'
+              }
+            }
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+              comment: true,
+              authorId: true,
+              postId: true,
+            },
+          },
+          tags: {
+            select: {
+              id: true,
+              tag_name: true,
+            },
+          },
+          cateogry:{
+            select:{category_name:true}
+          }
+        },
+        skip: offset,
+        take: limit,
+        
+      });
+      return res.status(200).send(allPostWithCategoryAndSearch);
+    }
+    //**all post with search query */
+    if(req.query.search){
+      const allSearchedPosts = await prisma.post.findMany({
+        where:{
+            title:{
+            contains:req.query.search as string,
+              mode:'insensitive'
+            }
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+              comment: true,
+              authorId: true,
+              postId: true,
+            },
+          },
+          tags: {
+            select: {
+              id: true,
+              tag_name: true,
+            },
+          },
+          cateogry:{
+            select:{category_name:true}
+          }
+        },
+        skip: offset,
+        take: limit,
+        
+      });
+      return res.status(200).send(allSearchedPosts);
+    }
+    //** allposts with category query */
+    if(req.query.category){
+      const allPostWithCategories = await prisma.post.findMany({
+        where:{
+            cateogry:{
+              category_name:{
+                equals:req.query.category as string,
+                mode:'insensitive'
+              }
+            }
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+          comments: {
+            select: {
+              id: true,
+              comment: true,
+              authorId: true,
+              postId: true,
+            },
+          },
+          tags: {
+            select: {
+              id: true,
+              tag_name: true,
+            },
+          },
+          cateogry:{
+            select:{category_name:true}
+          }
+          
+        },
+        skip: offset,
+        take: limit,
+        
+      });
+      return res.status(200).send(allPostWithCategories);
+    }
+    //!all post without search query
     const allPosts = await prisma.post.findMany({
       include: {
         author: {
@@ -134,13 +267,16 @@ router.get("/posts", async (req, res) => {
             tag_name: true,
           },
         },
+        cateogry:{
+          select:{category_name:true}
+        }
       },
       skip: offset,
       take: limit,
     });
     return res.status(200).send(allPosts);
   } catch (error) {
-    return res.status(404).send(error);
+    return res.status(500).send(error);
   }
 });
 //route to create new entry in user model
