@@ -132,8 +132,12 @@ const filterValidation = [
     body('sortBy').optional().notEmpty().withMessage('SortBy can not be empty string'),
 ];
 //! where filter type 
-type whereFilterType = {
+export type whereFilterType = {
   [key:string]: unknown | whereFilterType
+}
+//!orderBy query type 
+export type orderByType = {
+  [key:string]: 'asc' | 'desc'
 }
 
 //*all post with category and search query operation
@@ -324,7 +328,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     const page = +(req.query.page as string) || 1;
     const limit = +(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
-    let filterQuery:{[key:string]:string} = {};
+    let filterQuery:orderByType = {};
     let whereQuery:whereFilterType = {};
     const {sortBy,tags} = req.body;
     if(tags as string[] && tags.length > 0){
