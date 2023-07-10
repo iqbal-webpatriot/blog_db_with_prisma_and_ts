@@ -341,7 +341,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     else if(sortBy==="oneDayAgo"){
       const oneDayAgo = new Date();
       oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-      console.log('one day ago', oneDayAgo)
+      // console.log('one day ago', oneDayAgo)
       //oneDayAgo.setHours(0, 0, 0, 0); // Set time to midnigh
       whereQuery.createdAt={
         lte:oneDayAgo
@@ -350,7 +350,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     else if(sortBy==="oneWeekAgo"){
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      console.log('one week ago',oneWeekAgo)
+      // console.log('one week ago',oneWeekAgo)
       //oneWeekAgo.setHours(0, 0, 0, 0); // Set time to midnigh
       whereQuery.createdAt={
         lte:new Date(),
@@ -360,7 +360,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     else if(sortBy==="oneMonthAgo"){
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      console.log('one month ago',oneMonthAgo)
+      // console.log('one month ago',oneMonthAgo)
       //oneMonthAgo.setHours(0, 0, 0, 0); // Set time to midnigh
       whereQuery.createdAt={
         lt:new Date(),
