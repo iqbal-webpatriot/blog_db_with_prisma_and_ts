@@ -105,6 +105,27 @@ const updatePostImageValidation = [
     return true;
   }),
 ];
+//!filter validation 
+const filterValidation = [
+  body("tags.*").trim(),
+  body("tags")
+    .isArray({ min: 1 })
+    .withMessage("Tags field must be a non-empty array of strings")
+    .custom((value, { req }) => {
+      if (Array.isArray(value) && value.length > 0) {
+        // Validate each tag in the array
+        for (let tag of value) {
+          if (typeof tag !== "string" || tag.trim() === "") {
+            throw new Error("Each value must be a non-empty string in the tags array");
+          }
+        }
+      }
+      return true;
+    }),
+];
+
+
+//*all post with category and search query operation
 router.get("/posts", async (req, res) => {
   try {
     //!pagination query
@@ -245,6 +266,54 @@ router.get("/posts", async (req, res) => {
     }
     //!all post without search query
     const allPosts = await prisma.post.findMany({
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            comment: true,
+            authorId: true,
+            postId: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            tag_name: true,
+          },
+        },
+        cateogry:{
+          select:{category_name:true}
+        }
+      },
+      skip: offset,
+      take: limit,
+    });
+    return res.status(200).send(allPosts);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+//**router to filter posts based on tags name 
+router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
+
+  try {
+    //!pagination query
+    const page = +(req.query.page as string) || 1;
+    const limit = +(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+    const allPosts = await prisma.post.findMany({
+       where:{
+        tagId:{
+          hasSome:req.body.tags
+        }
+       },
       include: {
         author: {
           select: {
