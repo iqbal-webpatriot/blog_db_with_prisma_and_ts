@@ -360,7 +360,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     else if(sortBy==="oneMonthAgo"){
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      // console.log('one month ago',oneMonthAgo)
+      //  ('one month ago',oneMonthAgo)
       //oneMonthAgo.setHours(0, 0, 0, 0); // Set time to midnigh
       whereQuery.createdAt={
         lt:new Date(),
