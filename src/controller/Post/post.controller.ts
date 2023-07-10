@@ -107,8 +107,15 @@ const updatePostImageValidation = [
 ];
 //!filter validation 
 const filterValidation = [
-  body("tags.*").trim(),
-  body("tags")
+  body()
+  .custom(value => {
+    if (Object.keys(value).length === 0) {
+      throw new Error('No filter specified!');
+    }
+    return true;
+  }),
+  body("tags.*").optional().trim(),
+  body("tags").optional()
     .isArray({ min: 1 })
     .withMessage("Tags field must be a non-empty array of strings")
     .custom((value, { req }) => {
@@ -122,8 +129,12 @@ const filterValidation = [
       }
       return true;
     }),
+    body('sortBy').optional().notEmpty().withMessage('SortBy can not be empty string'),
 ];
-
+//! where filter type 
+type whereFilterType = {
+  [key:string]: unknown | whereFilterType
+}
 
 //*all post with category and search query operation
 router.get("/posts", async (req, res) => {
@@ -266,6 +277,10 @@ router.get("/posts", async (req, res) => {
     }
     //!all post without search query
     const allPosts = await prisma.post.findMany({
+      orderBy:{
+        createdAt:'desc'
+      },
+    
       include: {
         author: {
           select: {
@@ -290,7 +305,8 @@ router.get("/posts", async (req, res) => {
         },
         cateogry:{
           select:{category_name:true}
-        }
+        },
+        
       },
       skip: offset,
       take: limit,
@@ -300,7 +316,7 @@ router.get("/posts", async (req, res) => {
     return res.status(500).send(error);
   }
 });
-//**router to filter posts based on tags name 
+//**router to handler dynamic filtering like tag's name,mostLiked,mostViewed etc
 router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
 
   try {
@@ -308,11 +324,63 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     const page = +(req.query.page as string) || 1;
     const limit = +(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
-    const allPosts = await prisma.post.findMany({
-       where:{
-        tagId:{
-          hasSome:req.body.tags
+    let filterQuery:{[key:string]:string} = {};
+    let whereQuery:whereFilterType = {};
+    const {sortBy,tags} = req.body;
+    if(tags as string[] && tags.length > 0){
+        whereQuery.tagId={
+          hasSome:tags
         }
+    }
+    if(sortBy==="mostViewed"){
+      filterQuery.viewCount='desc';
+    }
+    else if(sortBy==="mostLiked"){
+      filterQuery.likeCount='desc';
+    }
+    else if(sortBy==="oneDayAgo"){
+      const oneDayAgo = new Date();
+      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      console.log('one day ago', oneDayAgo)
+      //oneDayAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+      whereQuery.createdAt={
+        lte:oneDayAgo
+      }
+    }
+    else if(sortBy==="oneWeekAgo"){
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      console.log('one week ago',oneWeekAgo)
+      //oneWeekAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+      whereQuery.createdAt={
+        lte:new Date(),
+        gte:oneWeekAgo
+      }
+    }
+    else if(sortBy==="oneMonthAgo"){
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      console.log('one month ago',oneMonthAgo)
+      //oneMonthAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+      whereQuery.createdAt={
+        lt:new Date(),
+        gte:oneMonthAgo
+      }
+    }
+    else{
+      filterQuery.createdAt='desc';
+    }
+  
+    const allPosts = await prisma.post.findMany({
+      orderBy:{
+        ...filterQuery,
+      
+      },
+       where:{
+        // tagId:{
+        //   hasSome:req.body.tags || []
+        // }
+        ...whereQuery
        },
       include: {
         author: {
@@ -343,6 +411,8 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
       skip: offset,
       take: limit,
     });
+    //reseting filter query
+    filterQuery={};
     return res.status(200).send(allPosts);
   } catch (error) {
     return res.status(500).send(error);
