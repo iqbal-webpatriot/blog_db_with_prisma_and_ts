@@ -26,6 +26,7 @@ app.use(cors());
 app.use(express.json());
 //making uploads folder public 
 app.use('/uploads',express.static('uploads'))
+app.set('trust proxy', true); // Enable trust for proxy headers
 // Routes
 app.use('/api', userController);
 app.use('/api', postController);

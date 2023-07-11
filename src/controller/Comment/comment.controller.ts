@@ -3,7 +3,6 @@ import Router ,{Response,Request}from 'express'
 import { prisma } from '../..';
 import { body } from 'express-validator';
 import handleValidation from '../../middleware/Validation/validationHandler';
-import { AuthenticatedUserRequest } from '../../types';
 const router = Router()
 //!comment validations query 
 const commentValidation = [
@@ -25,6 +24,7 @@ const commentValidation = [
   
 //get all comments route 
 router.get('/comments',async(req,res)=>{
+
     try {
         const allComments= await prisma.comment.findMany({
             include:{
