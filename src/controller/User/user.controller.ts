@@ -105,6 +105,7 @@ router.get('/users',async(req,res)=>{
               avatar: true,
               createdAt: true,
               updatedAt: true,
+              isActive: true
               // posts: {
               //   select: {
               //     id: true,
@@ -171,6 +172,7 @@ router.get('/user/:userId',async(req,res)=>{
             name:true,
             avatar:true,
             email:true,
+            isActive:true,
             posts: {
               select: {
                 id: true,

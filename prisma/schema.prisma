@@ -37,6 +37,7 @@ model User {
   address Address?
   posts   Post[]
   avatar  String?
+  isActive Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   comments Comment[]
