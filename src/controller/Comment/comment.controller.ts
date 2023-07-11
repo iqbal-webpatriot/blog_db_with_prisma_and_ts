@@ -1,7 +1,9 @@
-import Router from 'express'
+import { AuthenticatedRequest } from './../../middleware/Authentication/authenticate';
+import Router ,{Response,Request}from 'express'
 import { prisma } from '../..';
 import { body } from 'express-validator';
 import handleValidation from '../../middleware/Validation/validationHandler';
+import { AuthenticatedUserRequest } from '../../types';
 const router = Router()
 //!comment validations query 
 const commentValidation = [
@@ -67,4 +69,62 @@ router.post('/comment',handleValidation(commentValidation),async(req,res)=>{
         return res.status(500).send(error)
     }
 })
+//!update comment by the logged user 
+router.patch('/comment/edit',async(req:Request,res:Response)=>{
+    try {
+        //!find comment done by the user
+        const {userId,postId,comment}=req.body;
+        //  const user= req.user
+        const commentByUser = await prisma.comment.findFirst({
+            where: {
+                postId,
+                authorId:userId
+            }
+        });
+        //*if not found throw error 
+        if(!commentByUser)return res.status(404).send({message:"No Record Found"});
+        //*if found then update the comment
+        const updatedComment = await prisma.comment.update({
+            where:{
+                id:commentByUser.id
+            },
+            data:{
+                comment
+            },
+        
+        });
+        return res.status(200).send(updatedComment)
+        
+    } catch (error) {
+        return res.status(500).send(error);
+    }
+})
+//!delete comment by the logged user 
+router.delete('/comment/:userId/:postId',async(req:Request,res:Response)=>{
+    try {
+        //!find comment done by the user
+        const {userId,postId}=req.params;
+        //  const user= req.user
+        const commentByUser = await prisma.comment.findFirst({
+            where: {
+                postId,
+                authorId:userId
+            }
+        });
+        //*if not found throw error 
+        if(!commentByUser)return res.status(404).send({message:"No Record Found"});
+        //*if found then update the comment
+        const updatedComment = await prisma.comment.delete({
+            where:{
+                id:commentByUser.id
+            },
+        
+        });
+        return res.status(200).send({message:"Comment deleted successfully"})
+        
+    } catch (error) {
+        return res.status(500).send(error);
+    }
+})
+
 export default router;
