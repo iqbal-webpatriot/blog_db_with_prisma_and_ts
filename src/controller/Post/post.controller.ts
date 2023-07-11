@@ -300,6 +300,9 @@ router.get("/posts", async (req, res) => {
             authorId: true,
             postId: true,
           },
+          orderBy:{
+            createdAt:'desc'
+          }
         },
         tags: {
           select: {
