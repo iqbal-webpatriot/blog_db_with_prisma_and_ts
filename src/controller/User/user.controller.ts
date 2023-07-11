@@ -5,6 +5,7 @@ import path from 'path';
 import { uploadSingle } from '../../middleware/Upload/upload'
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
+import { orderByType, whereFilterType } from "../Post/post.controller";
 const router = Router();
 //!user profile picture update validation 
 const userProfileValidation =[
@@ -36,20 +37,82 @@ router.get('/users',async(req,res)=>{
   const offset = (page - 1) * limit;
     try {
       //!if req.query has send 
+      const {sortBy,search}=req.query;
+      let filterQuery:orderByType={}
+       let  whereFilter:whereFilterType = {};
+       if(search){
+        whereFilter.OR = [
+          {
+            name: {
+              contains: req.query.search as string,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              contains: req.query.search as string,
+              mode: "insensitive",
+            },
+          },
+        ];
+       }
+
+       if(sortBy==="isActive"){
+        // filterQuery.viewCount='desc';
+      }
+      
+      else if(sortBy==="oneDayAgo"){
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+         console.log('one day ago', oneDayAgo)
+        //oneDayAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+        whereFilter.createdAt={
+          gte: oneDayAgo,
+          lt:new Date()
+        }
+      }
+      else if(sortBy==="oneWeekAgo"){
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        // console.log('one week ago',oneWeekAgo)
+        //oneWeekAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+        whereFilter.createdAt={
+          lte:new Date(),
+          gte:oneWeekAgo
+        }
+      }
+      else if(sortBy==="oneMonthAgo"){
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        //  ('one month ago',oneMonthAgo)
+        //oneMonthAgo.setHours(0, 0, 0, 0); // Set time to midnigh
+        whereFilter.createdAt={
+          lt:new Date(),
+          gte:oneMonthAgo
+        }
+      }
+      else{
+        filterQuery.createdAt='desc';
+      }
+    
         const allUsers = await prisma.user.findMany({
+           where:whereFilter,
+            orderBy:filterQuery,
             select: {
               id: true,
               name: true,
               email: true,
               avatar: true,
-              posts: {
-                select: {
-                  id: true,
-                  title: true,
-                  body: true,
-                  authorId: true,
-                },
-              },
+              createdAt: true,
+              updatedAt: true,
+              // posts: {
+              //   select: {
+              //     id: true,
+              //     title: true,
+              //     body: true,
+              //     authorId: true,
+              //   },
+              // },
             },
             skip:offset,
             take:limit,

@@ -348,7 +348,8 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
       // console.log('one day ago', oneDayAgo)
       //oneDayAgo.setHours(0, 0, 0, 0); // Set time to midnigh
       whereQuery.createdAt={
-        lte:oneDayAgo
+        lt:new Date(),
+        gte:oneDayAgo
       }
     }
     else if(sortBy==="oneWeekAgo"){
