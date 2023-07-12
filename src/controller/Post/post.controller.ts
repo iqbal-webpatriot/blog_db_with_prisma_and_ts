@@ -5,6 +5,7 @@ import handleValidation from "../../middleware/Validation/validationHandler";
 import { uploadSingle } from "../../middleware/Upload/upload";
 import fs from "fs";
 import path from "path";
+import { setOrGetCache } from "../../helper/getOrSetCache";
 const router = Router();
 //!create post validation
 const postValidation = [
@@ -279,8 +280,8 @@ router.get("/posts", async (req, res) => {
       });
       return res.status(200).send(allPostWithCategories);
     }
-    //!all post without search query
-    const allPosts = await prisma.post.findMany({
+    // //!all post without search query
+    const allPosts =  prisma.post.findMany({
       orderBy:{
         createdAt:'desc'
       },
@@ -318,7 +319,8 @@ router.get("/posts", async (req, res) => {
       skip: offset,
       take: limit,
     });
-    return res.status(200).send(allPosts);
+    // return res.status(200).send(allPosts);
+     await setOrGetCache( req,res,'allPost',allPosts);
   } catch (error) {
     return res.status(500).send(error);
   }
