@@ -238,7 +238,7 @@ router.get("/posts", async (req, res) => {
     }
     //** allposts with category query */
     if(req.query.category){
-      const allPostWithCategories = await prisma.post.findMany({
+      const allPostWithCategories =  prisma.post.findMany({
         where:{
             cateogry:{
               category_name:{
@@ -278,7 +278,10 @@ router.get("/posts", async (req, res) => {
         take: limit,
         
       });
-      return res.status(200).send(allPostWithCategories);
+      //!redis function to handle caching 
+     await setOrGetCache( req,res,`allPost:${req.query.category}`,allPostWithCategories);
+     return
+      // return res.status(200).send(allPostWithCategories);
     }
     // //!all post without search query
     const allPosts =  prisma.post.findMany({
@@ -320,6 +323,7 @@ router.get("/posts", async (req, res) => {
       take: limit,
     });
     // return res.status(200).send(allPosts);
+    //!redis function to handle caching 
      await setOrGetCache( req,res,'allPost',allPosts);
   } catch (error) {
     return res.status(500).send(error);
