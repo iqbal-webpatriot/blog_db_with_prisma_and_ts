@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { prisma } from "../..";
+import { prisma, redisClient } from "../..";
 import ip from 'ip';
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
@@ -52,6 +52,11 @@ router.post('/viewcount',handleValidation(postViewCountValidation),async (req, r
                     viewCount:true
                 }
             });
+            const storedRedisPost= await redisClient.get(`post:${req.body.postId}`);
+             const parsedPost = JSON.parse(storedRedisPost as string);
+                parsedPost.viewCount=updatedBlogPost.viewCount;
+
+            await redisClient.set(`post:${req.body.postId}`,JSON.stringify(parsedPost))
             return res.status(200).send(updatedBlogPost)
         }
         //else return a message that view count has already saved

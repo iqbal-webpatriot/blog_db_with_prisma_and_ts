@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { prisma } from "../..";
+import { prisma, redisClient } from "../..";
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
 import { uploadSingle } from "../../middleware/Upload/upload";
@@ -522,6 +522,15 @@ router.get("/post/:id", async (req, res) => {
     });
     //!if not found throw error
     if (!postExist) return res.status(404).send({ message: "Post not found" });
+    //*check if post exist in redis cache
+     const postInRedisCache = await redisClient.exists(`post:${req.params.id}`);
+     console.log(
+      'postInRedisCache',postInRedisCache
+     )
+     if(postInRedisCache){
+      const post = await redisClient.get(`post:${req.params.id}`);
+      return res.status(200).send(JSON.parse(post as string));
+     }
     const singlePost = await prisma.post.findUnique({
       where: { id: req.params.id },
       include: {
@@ -548,6 +557,8 @@ router.get("/post/:id", async (req, res) => {
         },
       },
     });
+    //*set post in redis cache
+    await redisClient.set(`post:${req.params.id}`, JSON.stringify(singlePost));
     return res.status(200).send(singlePost);
   } catch (error) {
     return res.status(500).send(error);
