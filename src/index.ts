@@ -3,9 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config(); // Loading environment variables from .env file
-
+import { createClient } from 'redis';
 export const prisma = new PrismaClient(); // Initializing Prisma client
-
+export const redisClient = createClient(); // Initializing Redis client
 // Import controller
 import userController from './controller/User/user.controller';
 import postController from './controller/Post/post.controller'
@@ -46,6 +46,9 @@ app.use('/api',tagController)
 //   .catch((error) => {
 //     console.log('Error while connecting to the database', error);
 //   });
-app.listen(PORT, () => {
+
+redisClient.on('error', (error) => {console.log('Redis client error',error)})
+app.listen(PORT, async() => {
+   await redisClient.connect();
     console.log(`Server is running on port ${PORT}`);
   });
