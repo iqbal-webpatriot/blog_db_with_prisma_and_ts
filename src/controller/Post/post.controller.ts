@@ -470,7 +470,7 @@ router.post(
         },
       });
       //!reset redis cache
-      redisClient.flushAll();
+      redisClient.flushDb();
       return res.status(201).send(newPost);
     } catch (error) {
       return res.status(500).send(error);

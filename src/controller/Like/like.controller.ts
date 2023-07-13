@@ -45,7 +45,7 @@ router.post(
         },
       });
       //!reseting redis cache 
-      redisClient.flushAll();
+      redisClient.flushDb();
       //  await deleteKeysByPattern(`allPostWithPagination:*`);
       //  await deleteKeysByPattern("post:*")
       //if yes then decrement like count by one and update isLiked status to false
