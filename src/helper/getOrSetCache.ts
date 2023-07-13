@@ -7,7 +7,9 @@ export const setOrGetCache = async (
     res: Response,
     cacheKey: string,
     prismaQuery: Promise<any>,
+    totalPages?: number,// for pagination in some apis
   cacheTime = 3600 // Default cache time (in seconds)
+   
 ) => {
    try {
      const catchExist= await redisClient.get(cacheKey);
@@ -17,8 +19,17 @@ export const setOrGetCache = async (
         }
         console.log('**Fetching fresh data ....**')
         const freshData= await prismaQuery;
-        await redisClient.setEx(cacheKey,cacheTime,JSON.stringify(freshData));
-        return res.status(200).send(freshData);
+        let modifiedResult:{[key:string]:any} ={
+          data:freshData
+        }
+         if(totalPages){
+          modifiedResult={
+            ...modifiedResult,
+            totalPages
+          }
+         }
+        await redisClient.setEx(cacheKey,cacheTime,JSON.stringify(modifiedResult));
+        return res.status(200).send(modifiedResult);
    } catch (error) {
      console.log('error while caching',error)
      return res.status(500).send(error)

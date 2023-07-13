@@ -6,6 +6,7 @@ import { uploadSingle } from "../../middleware/Upload/upload";
 import fs from "fs";
 import path from "path";
 import { setOrGetCache } from "../../helper/getOrSetCache";
+
 const router = Router();
 //!create post validation
 const postValidation = [
@@ -141,6 +142,7 @@ export type orderByType = {
   [key:string]: 'asc' | 'desc'
 }
 
+
 //*all post with category and search query operation
 router.get("/posts", async (req, res) => {
   try {
@@ -148,9 +150,15 @@ router.get("/posts", async (req, res) => {
     const page = +(req.query.page as string) || 1;
     const limit = +(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
+    //** Total post count  */
+    const totalPostCount = await prisma.post.count();
+    //Total pages for pagination 
+    const totalPages = Math.ceil(totalPostCount / limit);
+    console.log('total pages', totalPages);
+
     //!if category and search has value 
     if(req.query.search && req.query.category){
-      const allPostWithCategoryAndSearch = await prisma.post.findMany({
+      const allPostWithCategoryAndSearch =  prisma.post.findMany({
         where:{
             title:{
             contains:req.query.search as string,
@@ -193,11 +201,14 @@ router.get("/posts", async (req, res) => {
         take: limit,
         
       });
-      return res.status(200).send(allPostWithCategoryAndSearch);
+      //!redis function to handle caching 
+     await setOrGetCache( req,res,`allPostWithPaginationAndSearchCat:${page} ${limit}${req.query.search}${req.query.category}`,allPostWithCategoryAndSearch,totalPages,300);
+     return
+      // return res.status(200).send(allPostWithCategoryAndSearch);
     }
     //**all post with search query */
     if(req.query.search){
-      const allSearchedPosts = await prisma.post.findMany({
+      const allSearchedPosts =  prisma.post.findMany({
         where:{
             title:{
             contains:req.query.search as string,
@@ -234,7 +245,11 @@ router.get("/posts", async (req, res) => {
         take: limit,
         
       });
-      return res.status(200).send(allSearchedPosts);
+       //!redis function to handle caching 
+     await setOrGetCache( req,res,`allPostWithPaginationAndSearch:${page} ${limit}${req.query.search}`,allSearchedPosts,totalPages,300);
+     return 
+      // return res.status(200).send(allSearchedPosts);
+
     }
     //** allposts with category query */
     if(req.query.category){
@@ -279,7 +294,7 @@ router.get("/posts", async (req, res) => {
         
       });
       //!redis function to handle caching 
-     await setOrGetCache( req,res,`allPost:${req.query.category}`,allPostWithCategories);
+     await setOrGetCache( req,res,`allPostWithPaginationAndCat:${page} ${limit}${req.query.category}`,allPostWithCategories,totalPages,300);
      return
       // return res.status(200).send(allPostWithCategories);
     }
@@ -324,7 +339,7 @@ router.get("/posts", async (req, res) => {
     });
     // return res.status(200).send(allPosts);
     //!redis function to handle caching 
-     await setOrGetCache( req,res,'allPost',allPosts);
+     await setOrGetCache( req,res,`allPostWithPagination:${page} ${limit}`,allPosts,totalPages);
   } catch (error) {
     return res.status(500).send(error);
   }
