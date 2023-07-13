@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { prisma } from "../..";
+import { prisma, redisClient } from "../..";
 import { body } from "express-validator";
 import handleValidation from "../../middleware/Validation/validationHandler";
 import  authenticate  from "../../middleware/Authentication/authenticate";
+import { deleteKeysByPattern } from "../../helper/deleteKyesByPattern";
 const router = Router();
 //!liked post validation
 const likePostValidation = [
@@ -43,7 +44,10 @@ router.post(
           postId,
         },
       });
-
+      //!reseting redis cache 
+      redisClient.flushAll();
+      //  await deleteKeysByPattern(`allPostWithPagination:*`);
+      //  await deleteKeysByPattern("post:*")
       //if yes then decrement like count by one and update isLiked status to false
       if (likePost) {
         const updatedLikedPost = await prisma.like.update({
