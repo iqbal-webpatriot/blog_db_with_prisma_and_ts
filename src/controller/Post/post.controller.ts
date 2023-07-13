@@ -451,14 +451,14 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     return res.status(500).send(error);
   }
 });
-//route to create new entry in user model
+//*route to create new entry in user model
 router.post(
   "/post",
   uploadSingle("postImage"),
   handleValidation(postValidation),
   async (req, res) => {
     try {
-      const newUser = await prisma.post.create({
+      const newPost = await prisma.post.create({
         data: {
           slug: req.body.slug,
           title: req.body.title,
@@ -469,7 +469,9 @@ router.post(
           categoryId: req.body.categoryId,
         },
       });
-      return res.status(201).send(newUser);
+      //!reset redis cache
+      redisClient.flushAll();
+      return res.status(201).send(newPost);
     } catch (error) {
       return res.status(500).send(error);
     }
