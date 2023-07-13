@@ -355,7 +355,9 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
     let filterQuery:orderByType = {};
     let whereQuery:whereFilterType = {};
     const {sortBy,tags} = req.body;
+    let TAG_KEY='';
     if(tags as string[] && tags.length > 0){
+        TAG_KEY = tags.join(' ');
         whereQuery.tagId={
           hasSome:tags
         }
@@ -400,7 +402,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
       filterQuery.createdAt='desc';
     }
   
-    const allPosts = await prisma.post.findMany({
+    const allPosts =  prisma.post.findMany({
       orderBy:{
         ...filterQuery,
       
@@ -440,9 +442,11 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
       skip: offset,
       take: limit,
     });
+    //!redis function to handle caching 
+    await setOrGetCache( req,res,`postSortAndFilter :${page} ${limit} ${sortBy} ${TAG_KEY}`,allPosts);
     //reseting filter query
-    filterQuery={};
-    return res.status(200).send(allPosts);
+    // filterQuery={};
+    // return res.status(200).send(allPosts);
   } catch (error) {
     return res.status(500).send(error);
   }
