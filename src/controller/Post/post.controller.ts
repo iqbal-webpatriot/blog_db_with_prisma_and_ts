@@ -528,16 +528,8 @@ router.get("/post/:id", async (req, res) => {
     });
     //!if not found throw error
     if (!postExist) return res.status(404).send({ message: "Post not found" });
-    //*check if post exist in redis cache
-     const postInRedisCache = await redisClient.exists(`post:${req.params.id}`);
-     console.log(
-      'postInRedisCache',postInRedisCache
-     )
-     if(postInRedisCache){
-      const post = await redisClient.get(`post:${req.params.id}`);
-      return res.status(200).send(JSON.parse(post as string));
-     }
-    const singlePost = await prisma.post.findUnique({
+   
+    const singlePost =  prisma.post.findUnique({
       where: { id: req.params.id },
       include: {
         author: {
@@ -563,9 +555,9 @@ router.get("/post/:id", async (req, res) => {
         },
       },
     });
-    //*set post in redis cache
-    await redisClient.set(`post:${req.params.id}`, JSON.stringify(singlePost));
-    return res.status(200).send(singlePost);
+    //!redis handler 
+     await setOrGetCache(req,res,`post:${req.params.id}`,singlePost)
+    
   } catch (error) {
     return res.status(500).send(error);
   }

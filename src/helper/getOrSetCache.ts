@@ -12,8 +12,10 @@ export const setOrGetCache = async (
    try {
      const catchExist= await redisClient.get(cacheKey);
         if(catchExist){
+          console.log('###Hitting cache ....###')
             return res.status(200).send(JSON.parse(catchExist));
         }
+        console.log('**Fetching fresh data ....**')
         const freshData= await prismaQuery;
         await redisClient.setEx(cacheKey,cacheTime,JSON.stringify(freshData));
         return res.status(200).send(freshData);
