@@ -443,7 +443,7 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
       take: limit,
     });
     //!redis function to handle caching 
-    await setOrGetCache( req,res,`postSortAndFilter :${page} ${limit} ${sortBy} ${TAG_KEY}`,allPosts);
+    await setOrGetCache( req,res,`postSortAndFilter:${page} ${limit} ${sortBy} ${TAG_KEY}`,allPosts);
     //reseting filter query
     // filterQuery={};
     // return res.status(200).send(allPosts);
