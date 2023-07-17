@@ -46,6 +46,12 @@ const postValidation = [
     }
     return true;
   }),
+  body("tags")
+  .isArray()
+  .withMessage("Tag field must be an array of strings"),
+body("tags.*")
+  .notEmpty()
+  .withMessage("Each value must be an id of string in the tags array"),
 ];
 //!Update post validation
 const updatePostValidation = [
