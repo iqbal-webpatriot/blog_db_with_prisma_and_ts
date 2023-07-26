@@ -52,6 +52,19 @@ const postValidation = [
 body("tags.*")
   .notEmpty()
   .withMessage("Each value must be an id of string in the tags array"),
+  body('status').optional().custom(value => {
+    const allowedStatuses = ['Draft', 'Scheduled', 'Published']; // Define your enum
+    if (!allowedStatuses.includes(value)) {
+      throw new Error('Invalid status.It must be one among Draft,Scheduled and Published'); // Throw error if the status is not in the enum
+    }
+    return true;
+  }),
+  body('publishDate').optional()
+  .notEmpty()
+  .withMessage('publishDate is required')
+  .isISO8601()
+  .withMessage('publishDate must be a valid date in ISO8601 format')
+  .toDate()
 ];
 //!Update post validation
 const updatePostValidation = [
@@ -175,7 +188,8 @@ router.get("/posts", async (req, res) => {
                 equals:req.query.category as string,
                 mode:'insensitive'
               }
-            }
+            },
+            status:'Published'
         },
         include: {
           author: {
@@ -219,7 +233,8 @@ router.get("/posts", async (req, res) => {
             title:{
             contains:req.query.search as string,
               mode:'insensitive'
-            }
+            },
+            status:'Published'
         },
         include: {
           author: {
@@ -266,7 +281,8 @@ router.get("/posts", async (req, res) => {
                 equals:req.query.category as string,
                 mode:'insensitive'
               }
-            }
+            },
+            status:'Published'
         },
         include: {
           author: {
@@ -309,6 +325,9 @@ router.get("/posts", async (req, res) => {
       orderBy:{
         createdAt:'desc'
       },
+      where:{
+        status:'Published'
+      },
     
       include: {
         author: {
@@ -344,6 +363,7 @@ router.get("/posts", async (req, res) => {
       take: limit,
     });
     // return res.status(200).send(allPosts);
+      //  redisClient.flushDb()
     //!redis function to handle caching 
      await setOrGetCache( req,res,`allPostWithPagination:${page} ${limit}`,allPosts,totalPages);
   } catch (error) {
@@ -417,7 +437,8 @@ router.post('/post/filter',handleValidation(filterValidation),async(req,res)=>{
         // tagId:{
         //   hasSome:req.body.tags || []
         // }
-        ...whereQuery
+        ...whereQuery,
+        status:'Published'
        },
       include: {
         author: {
@@ -473,6 +494,8 @@ router.post(
           tagId: req.body.tags,
           postImage: req?.file?.filename as string,
           categoryId: req.body.categoryId,
+          status:req.body.status || 'Draft',
+          scheduledAt:req.body.publishDate || null
         },
       });
       //!reset redis cache
