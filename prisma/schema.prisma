@@ -6,12 +6,21 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+//!Post Status 
+enum PostStatus {
+ Draft
+ Scheduled
+ Published
+}
 //!Post model
 model Post {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   slug     String    @unique
   title    String
   body     String
+  status    PostStatus @default(Draft)
+  scheduledAt DateTime?
   viewCount Int?      @default(0)
   likeCount Int?      @default(0)
   createdAt DateTime @default(now())
