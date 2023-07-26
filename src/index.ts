@@ -16,7 +16,9 @@ import likeController from './controller/Like/like.controller'
 import viewCountController from './controller/ViewCount/viewCount.controller';
 import categoryController from './controller/Category/category.controller';
 import tagController from './controller/Tag/tag.controller';
-
+import { fetchAndSchedulePosts } from './jobs/postPublish.job';
+import getActiveJobs from './jobs/activeJobs';
+import cron from 'node-cron'
 // Initializing express app
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,5 +52,11 @@ app.use('/api',tagController)
 redisClient.on('error', (error) => {console.log('Redis client error',error)})
 app.listen(PORT, async() => {
    await redisClient.connect();
+   //!running cron
+  //  cron.schedule('* * * * *',async () => {
+  //    await fetchAndSchedulePosts();
+  //    await getActiveJobs()
+
+  // });
     console.log(`Server is running on port ${PORT}`);
   });
