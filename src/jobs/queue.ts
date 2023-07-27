@@ -3,7 +3,16 @@ import { publishPost } from './postPublish.job';
 import getActiveJobs from './activeJobs';
 //!initilize queues
 const Queue = Bull;
-const blogQueue: Bull.Queue = new Queue('blog publishing', 'redis://127.0.0.1:6379');
+const blogQueue: Bull.Queue = new Queue('blog publishing', {
+      redis:{
+        host:'localhost',
+        port:6379,
+        db:1
+      },
+      defaultJobOptions:{
+        removeOnComplete:true
+      }
+});
 // console.log('******Blog queru',blogQueue)
 // ioredis client
 const client = blogQueue.client;

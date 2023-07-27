@@ -6,6 +6,7 @@ import { uploadSingle } from "../../middleware/Upload/upload";
 import fs from "fs";
 import path from "path";
 import { setOrGetCache } from "../../helper/getOrSetCache";
+import blogQueue from "../../jobs/queue";
 
 const router = Router();
 //!create post validation
@@ -499,7 +500,13 @@ router.post(
         },
       });
       //!reset redis cache
+      redisClient.select(0)
       redisClient.flushDb();
+      if(newPost.status==='Scheduled'){
+          const delayDate= newPost.scheduledAt as Date;
+        const delay = delayDate.getTime() - new Date().getTime();
+       await  blogQueue.add({ blogPostId: newPost.id }, { delay: delay, attempts: 3 });
+      }
       return res.status(201).send(newPost);
     } catch (error) {
       return res.status(500).send(error);

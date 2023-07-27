@@ -5,7 +5,6 @@ export async function fetchAndSchedulePosts() {
     const posts = await prisma.post.findMany({
       where: { status: 'Scheduled' },
     });
-    console.log('pending posts', posts);
   
     // Use map instead of forEach to return an array of promises
     const jobs = posts.map((post) => {

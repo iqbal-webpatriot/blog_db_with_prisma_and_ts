@@ -54,7 +54,6 @@ app.listen(PORT, async() => {
    await redisClient.connect();
    //!running cron
   //  cron.schedule('* * * * *',async () => {
-  //    await fetchAndSchedulePosts();
   //    await getActiveJobs()
 
   // });
