@@ -499,14 +499,16 @@ router.post(
           scheduledAt:req.body.publishDate || null
         },
       });
+      //!scheduling job
+      if(newPost.status==='Scheduled'){
+        const delayDate= newPost.scheduledAt as Date;
+      const delay = delayDate.getTime() - new Date().getTime();
+     await  blogQueue.add({ blogPostId: newPost.id }, { delay: delay, attempts: 3 });
+    }
       //!reset redis cache
       redisClient.select(0)
       redisClient.flushDb();
-      if(newPost.status==='Scheduled'){
-          const delayDate= newPost.scheduledAt as Date;
-        const delay = delayDate.getTime() - new Date().getTime();
-       await  blogQueue.add({ blogPostId: newPost.id }, { delay: delay, attempts: 3 });
-      }
+      
       return res.status(201).send(newPost);
     } catch (error) {
       return res.status(500).send(error);
@@ -535,6 +537,9 @@ router.patch(
             tagId: req.body.tags || postExist.tagId,
           },
         });
+         //!reset redis cache
+      redisClient.select(0)
+      redisClient.flushDb();
         return res.status(200).send(updatedPost);
       } else {
         return res.status(404).send({ message: "No Record Found" });
@@ -569,6 +574,9 @@ router.patch(
           postImage: true,
         },
       });
+       //!reset redis cache
+       redisClient.select(0)
+       redisClient.flushDb();
       return res.status(200).send(updatedPost);
     } catch (error) {
       return res.status(500).send(error);
@@ -673,6 +681,9 @@ router.delete("/post/:userId/:postId", async (req, res) => {
       });
       //!delete uploaded image from the uploads folder
       fs.unlinkSync(path.join(process.cwd(), "uploads", postExist.postImage));
+       //!reset redis cache
+       redisClient.select(0)
+       redisClient.flushDb();
       return res.status(200).send({ message: "Post deleted successfully" });
     }
   } catch (error) {

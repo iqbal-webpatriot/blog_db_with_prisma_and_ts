@@ -52,11 +52,9 @@ router.post('/viewcount',handleValidation(postViewCountValidation),async (req, r
                     viewCount:true
                 }
             });
-            const storedRedisPost= await redisClient.get(`post:${req.body.postId}`);
-             const parsedPost = JSON.parse(storedRedisPost as string);
-                parsedPost.viewCount=updatedBlogPost.viewCount;
-
-            await redisClient.set(`post:${req.body.postId}`,JSON.stringify(parsedPost))
+            //!reset redis cache
+      redisClient.select(0)
+      redisClient.flushDb();
             return res.status(200).send(updatedBlogPost)
         }
         //else return a message that view count has already saved

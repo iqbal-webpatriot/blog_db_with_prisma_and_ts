@@ -1,6 +1,6 @@
 import { AuthenticatedRequest } from './../../middleware/Authentication/authenticate';
 import Router ,{Response,Request}from 'express'
-import { prisma } from '../..';
+import { prisma, redisClient } from '../..';
 import { body } from 'express-validator';
 import handleValidation from '../../middleware/Validation/validationHandler';
 const router = Router()
@@ -64,6 +64,9 @@ router.post('/comment',handleValidation(commentValidation),async(req,res)=>{
 
             }
         })
+         //!reset redis cache
+      redisClient.select(0)
+      redisClient.flushDb();
         return res.status(201).send(newComment)
     } catch (error) {
         return res.status(500).send(error)
@@ -93,6 +96,9 @@ router.patch('/comment/edit',async(req:Request,res:Response)=>{
             },
         
         });
+         //!reset redis cache
+      redisClient.select(0)
+      redisClient.flushDb();
         return res.status(200).send(updatedComment)
         
     } catch (error) {
@@ -120,6 +126,9 @@ router.delete('/comment/:userId/:postId',async(req:Request,res:Response)=>{
             },
         
         });
+         //!reset redis cache
+      redisClient.select(0)
+      redisClient.flushDb();
         return res.status(200).send({message:"Comment deleted successfully"})
         
     } catch (error) {
